@@ -26,10 +26,10 @@ variable "instance_type" {
 }
 
 variable "ubuntu_ami" {
-  description = "AMI to use for the server by region"
-  type        = map(string)
+  description     = "AMI to use for the server by region"
+  type            = map(string)
   default = {
-    us-east-1 = "ami-0a6b2839d44d781b2"
-    us-east-1-am = "ami-0b5eea76982371e91"
+    us-east-1     = "ami-0a6b2839d44d781b2"
+    us-east-1-am  = "ami-0b5eea76982371e91"
   }
 }
