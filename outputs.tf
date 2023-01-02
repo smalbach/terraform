@@ -29,7 +29,7 @@ output "public_dns_server_2" {
 #---------------------------------------
 output "public_ip_server_2" {
   description = "value of the public ip"
-  value = "http://${aws_instance.server-2.public_ip}:8080"
+  value = "http://${aws_instance.server-2.public_ip}:${var.server_port}"
 }
 
 
@@ -39,5 +39,5 @@ output "public_ip_server_2" {
 #---------------------------------------
 output "public_dns_load_balancer" {
   description = "value of the public dns load balancer"
-  value = "http://${aws_lb.alb.dns_name}"
+  value = "http://${aws_lb.alb.dns_name}:${var.lb_port}"
 }

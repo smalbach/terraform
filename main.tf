@@ -32,8 +32,8 @@ data "aws_subnet" "az_b" {
 # server-1: web server
 # ---------------------------------------
 resource "aws_instance" "server-1" {
-  ami           = "ami-0a6b2839d44d781b2"
-  instance_type = "t2.micro"
+  ami           = var.ubuntu_ami["us-east-1"]
+  instance_type = var.instance_type
   subnet_id = data.aws_subnet.az_a.id
   vpc_security_group_ids = [ aws_security_group.security_group.id ]
   
@@ -42,7 +42,7 @@ resource "aws_instance" "server-1" {
   user_data = <<-EOF
               #!/bin/bash
               echo "Hello, World- server 1" > index.html
-              nohup busybox httpd -f -p 8080 &
+              nohup busybox httpd -f -p ${var.server_port} &
               EOF
     tags = {
     Name = "server-1"
@@ -54,17 +54,16 @@ resource "aws_instance" "server-1" {
 # Define server-2: web server
 # ---------------------------------------
 resource "aws_instance" "server-2" {
-  ami           = "ami-0a6b2839d44d781b2"
-  instance_type = "t2.micro"
+  ami           = var.ubuntu_ami["us-east-1"]
+  instance_type = var.instance_type
   subnet_id = data.aws_subnet.az_b.id
   vpc_security_group_ids = [ aws_security_group.security_group.id ]
-  
   // Crete a file with the user data
   // used to install the web server and start it
   user_data = <<-EOF
               #!/bin/bash
               echo "Hello, World - server 2" > index.html
-              nohup busybox httpd -f -p 8080 &
+              nohup busybox httpd -f -p  ${var.server_port} &
               EOF
     tags = {
     Name = "server-2"
@@ -81,8 +80,8 @@ resource "aws_security_group" "security_group" {
   ingress {
     security_groups = [aws_security_group.alb.id]
     description = "HTTP"
-    from_port   = 8080
-    to_port     = 8080
+    from_port   = var.server_port
+    to_port     = var.server_port
     protocol    = "tcp"
   }
 
@@ -104,20 +103,20 @@ resource "aws_lb" "alb" {
 # ---------------------------------------
 resource "aws_security_group" "alb" {
   name          = "alb-sg"
-  description   = "Allow  port 80  HTTPtraffic"
+  description   = "Allow  port ${var.lb_port}  HTTPtraffic"
   vpc_id        = data.aws_vpc.default.id
   ingress {
     cidr_blocks = ["0.0.0.0/0"]
     description = "HTTP"
-    from_port   = 80
-    to_port     = 80
+    from_port   = var.lb_port
+    to_port     = var.lb_port
     protocol    = "tcp"
   }
   egress {
     cidr_blocks = ["0.0.0.0/0"]
     description = "Allow all outbound traffic"
-    from_port   = 8080
-    to_port     = 8080
+    from_port   = var.server_port
+    to_port     = var.server_port
     protocol    = "tcp"
   }
 
@@ -129,7 +128,7 @@ resource "aws_security_group" "alb" {
 # ---------------------------------------
 resource "aws_lb_target_group" "this" {
   name                  = "alb-tg"
-  port                  = 80
+  port                  = var.lb_port
   protocol              = "HTTP"
   vpc_id                = data.aws_vpc.default.id
 
@@ -137,7 +136,7 @@ resource "aws_lb_target_group" "this" {
     enabled             = true
     matcher             = "200"
     path                = "/"
-    port                = "8080"
+    port                = "${var.server_port}"
     protocol            = "HTTP"
   }
 
@@ -149,7 +148,7 @@ resource "aws_lb_target_group" "this" {
 resource "aws_lb_target_group_attachment" "server-1" {
   target_group_arn = aws_lb_target_group.this.arn
   target_id        = aws_instance.server-1.id
-  port             = 8080
+  port             = var.server_port
 }
 
 
@@ -159,7 +158,7 @@ resource "aws_lb_target_group_attachment" "server-1" {
 resource "aws_lb_target_group_attachment" "server-2" {
   target_group_arn = aws_lb_target_group.this.arn
   target_id        = aws_instance.server-2.id
-  port             = 8080
+  port             = var.server_port
 }
 
 # ---------------------------------------
@@ -167,7 +166,7 @@ resource "aws_lb_target_group_attachment" "server-2" {
 # ---------------------------------------
 resource "aws_lb_listener" "this" {
   load_balancer_arn = aws_lb.alb.arn
-  port              = 80
+  port              = var.lb_port
   default_action {
     type             = "forward"
     target_group_arn = aws_lb_target_group.this.arn
