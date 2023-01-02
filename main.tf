@@ -3,7 +3,13 @@
 # Define aws provider
 # -------------------------
 provider "aws" {
+  region = local.region
+}
+
+locals {
+  # Define the security group name
   region = "us-east-1"
+  ami = var.ubuntu_ami[local.region]
 }
 
 # ----------------------------------------------------
@@ -17,12 +23,12 @@ data "aws_vpc" "default" {
 # Data Source to get the default subnet ID
 # ----------------------------------------------------
 data "aws_subnet" "az_a" {
-  availability_zone = "us-east-1a"
+  availability_zone = "${local.region}a"
   #if you have more than one subnet in the same AZ, you can use the default_for_az attribute to get the default subnet for the AZ
   default_for_az              =  true
 }
 data "aws_subnet" "az_b" {
-  availability_zone = "us-east-1b"
+  availability_zone = "${local.region}b"
   #if you have more than one subnet in the same AZ, you can use the default_for_az attribute to get the default subnet for the AZ
   default_for_az              =  true
 }
@@ -32,7 +38,7 @@ data "aws_subnet" "az_b" {
 # server-1: web server
 # ---------------------------------------
 resource "aws_instance" "server-1" {
-  ami           = var.ubuntu_ami["us-east-1"]
+  ami           = local.ami
   instance_type = var.instance_type
   subnet_id = data.aws_subnet.az_a.id
   vpc_security_group_ids = [ aws_security_group.security_group.id ]
@@ -54,7 +60,7 @@ resource "aws_instance" "server-1" {
 # Define server-2: web server
 # ---------------------------------------
 resource "aws_instance" "server-2" {
-  ami           = var.ubuntu_ami["us-east-1"]
+  ami           = local.ami
   instance_type = var.instance_type
   subnet_id = data.aws_subnet.az_b.id
   vpc_security_group_ids = [ aws_security_group.security_group.id ]
