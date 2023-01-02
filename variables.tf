@@ -33,3 +33,22 @@ variable "ubuntu_ami" {
     us-east-1-am  = "ami-0b5eea76982371e91"
   }
 }
+
+
+variable "servers" {
+  description = "Map of servers to create with their name and availability zone"
+  type        = map(object({
+    name = string
+    az  = string
+  }))
+  default =  {
+    server-1 = {
+      name = "server-1"
+      az = "a"
+    }
+    server-2 = {
+      name = "server-2"
+      az = "b"
+    }
+  }
+}
