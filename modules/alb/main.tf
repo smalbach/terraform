@@ -4,7 +4,7 @@
 # ---------------------------------------
 resource "aws_lb" "alb" {
   load_balancer_type  = "application"
-  name                = "terraformers-alb"
+  name                = "terraformers-alb-${var.environment}"
   security_groups     = [aws_security_group.alb.id]
   subnets             =  var.subnet_ids
 }
@@ -14,7 +14,7 @@ resource "aws_lb" "alb" {
 # Define Security Group for Load Balancer
 # ---------------------------------------
 resource "aws_security_group" "alb" {
-  name          = "alb-sg"
+  name          = "alb-sg-${var.environment}"
   ingress {
     cidr_blocks = ["0.0.0.0/0"]
     description = "HTTP"
@@ -42,7 +42,7 @@ data "aws_vpc" "default" {
 # Define Target Group of Load Balancer
 # ---------------------------------------
 resource "aws_lb_target_group" "this" {
-  name                  = "alb-tg"
+  name                  = "alb-tg-${var.environment}"
   port                  = var.lb_port
   protocol              = "HTTP"
   vpc_id                = data.aws_vpc.default.id

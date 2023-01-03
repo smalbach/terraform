@@ -27,7 +27,7 @@ resource "aws_instance" "server" {
 # Define Security Group
 # ---------------------------------------
 resource "aws_security_group" "security_group" {
-  name        = "my-sg"
+  name        = "security-group-${var.environment}"
   ingress {
     cidr_blocks = ["0.0.0.0/0"]
     description = "HTTP"

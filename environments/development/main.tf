@@ -11,6 +11,7 @@ locals {
   ami = var.ubuntu_ami[local.region]
   lb_port = 80
   server_port = 8080
+  environment = "dev"
 }
 
 # ----------------------------------------------------
@@ -24,8 +25,8 @@ data "aws_subnet" "public_subnet" {
 }
 
 module "ec2_servers" {
-  source        = "./modules/ec2-instances"
-  instance_type = "t2.micro"
+  source        = "../../modules/ec2-instances"
+  instance_type = "t2.nano"
   ami_id        = var.ubuntu_ami[local.region]
   server_port   = local.server_port
   servers       = {
@@ -35,13 +36,15 @@ module "ec2_servers" {
       subnet_id = data.aws_subnet.public_subnet[id_ser].id
     }
   }
+  environment = local.environment
 }
 
 module "loadbalancer" {
-  source        = "./modules/alb"
+  source        = "../../modules/alb"
 
   subnet_ids    = [for subnet in data.aws_subnet.public_subnet : subnet.id]
   instances_ids = module.ec2_servers.instances_ids
   lb_port       = local.lb_port
   server_port   = local.server_port
+  environment = local.environment
 }

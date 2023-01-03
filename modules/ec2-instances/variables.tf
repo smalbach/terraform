@@ -28,3 +28,9 @@ variable "servers" {
     subnet_id   = string
   }))
 }
+
+variable "environment" {
+  description = "Environment name"
+  type        = string
+  default     = ""
+}

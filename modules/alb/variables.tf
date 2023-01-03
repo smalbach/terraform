@@ -29,3 +29,8 @@ variable "server_port" {
 }
 
 
+variable "environment" {
+  description = "Environment name"
+  type        = string
+  default     = ""
+}
