@@ -1,0 +1,3 @@
+COMAND
+
+terraform graph | dot -Tpng -o plan.png
