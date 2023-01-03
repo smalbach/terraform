@@ -9,46 +9,28 @@ variable "server_port" {
   }
 }
 
-variable "lb_port" {
-  description = "Port to use for the server LB"
-  type        = number
-  default     = 80
-  validation {
-    condition     = var.lb_port > 0 && var.lb_port < 65536
-    error_message = "The server_port must be between 1 and 65536."
-  }
-}
-
-variable "instance_type" {
-  description = "Type of instance to use for the server"
-  type        = string
-  default     = "t2.micro"
-}
-
 variable "ubuntu_ami" {
-  description     = "AMI to use for the server by region"
-  type            = map(string)
+  description = "AMI por region"
+  type        = map(string)
+
+  // Ubuntu  -> https://cloud-images.ubuntu.com/locator/ec2/
   default = {
-    us-east-1     = "ami-0a6b2839d44d781b2"
-    us-east-1-am  = "ami-0b5eea76982371e91"
+    us-east-1 = "ami-0574da719dca65348" # Ubuntu
+    us-east-2 = "ami-0574da719dca65348" # Ubuntu
   }
 }
-
 
 variable "servers" {
   description = "Map of servers to create with their name and availability zone"
-  type        = map(object({
-    name = string
-    az  = string
-  }))
-  default =  {
-    server-1 = {
-      name = "server-1"
-      az = "a"
-    }
-    server-2 = {
-      name = "server-2"
-      az = "b"
-    }
+
+   type = map(object({
+    name = string,
+    az     = string
+    })
+  )
+
+  default = {
+    "server-1" = { name = "server-1", az = "a" },
+    "server-2" = { name = "server-2", az = "b" },
   }
 }
